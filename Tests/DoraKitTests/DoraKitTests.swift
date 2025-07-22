@@ -10,6 +10,7 @@ import DoraKitMacros
 
 let testMacros: [String: Macro.Type] = [
     "jsonKey": JsonKeyMacro.self,
+    "AutoCodingKeys": AutoCodingKeysMacro.self,
 ]
 #endif
 
@@ -35,9 +36,9 @@ final class DoraKitTests: XCTestCase {
        }
     
     /// 1. 변수 선언이 아님
-        func test_jsonKey_onNonVariable_shouldFail() {
-            #if canImport(DoraKitMacros)
-            assertMacroExpansion(
+    func test_jsonKey_onNonVariable_shouldFail() {
+        #if canImport(DoraKitMacros)
+        assertMacroExpansion(
                 """
                 func foo() {
                     @jsonKey("invalid") print("Hello")
@@ -52,7 +53,7 @@ final class DoraKitTests: XCTestCase {
                     )
                 ],
                 macros: testMacros
-            )
+        )
             #else
             throw XCTSkip("macros are only supported when running tests for the host platform")
             #endif
@@ -129,6 +130,165 @@ final class DoraKitTests: XCTestCase {
             throw XCTSkip("macros are only supported when running tests for the host platform")
             #endif
         }
+    
+    
+    func test_autoCodingKeys_shouldGenerateCorrectCodingKeys() {
+        #if canImport(DoraKitMacros)
+        assertMacroExpansion(
+            """
+            @AutoCodingKeys
+            struct User: Codable {
+                @jsonKey("user_name") let name: String
+                @jsonKey("user_age") let age: Int
+                let email: String
+                let isActive: Bool
+            }
+            """,
+            expandedSource: """
+            struct User: Codable {
+                let name: String
+                let age: Int
+                let email: String
+                let isActive: Bool
+            
+                enum CodingKeys: String, CodingKey {
+                    case name = "user_name"
+                    case age = "user_age"
+                    case email
+                    case isActive
+                }
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+    
+    func test_autoCodingKeys_withOnlyJsonKeyProperties() {
+        #if canImport(DoraKitMacros)
+        assertMacroExpansion(
+            """
+            @AutoCodingKeys
+            struct Product: Codable {
+                @jsonKey("product_id") let id: String
+                @jsonKey("product_name") let name: String
+            }
+            """,
+            expandedSource: """
+            struct Product: Codable {
+                let id: String
+                let name: String
+            
+                enum CodingKeys: String, CodingKey {
+                    case id = "product_id"
+                    case name = "product_name"
+                }
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+
+    func test_autoCodingKeys_withNoJsonKeyProperties() {
+        #if canImport(DoraKitMacros)
+        assertMacroExpansion(
+            """
+            @AutoCodingKeys
+            struct Settings: Codable {
+                let theme: String
+                let notifications: Bool
+            }
+            """,
+            expandedSource: """
+            struct Settings: Codable {
+                let theme: String
+                let notifications: Bool
+            
+                enum CodingKeys: String, CodingKey {
+                    case theme
+                    case notifications
+                }
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+
+    func test_autoCodingKeys_withExistingCodingKeys_shouldFail() {
+        #if canImport(DoraKitMacros)
+        assertMacroExpansion(
+            """
+            @AutoCodingKeys
+            struct User: Codable {
+                @jsonKey("user_name") let name: String
+                let age: Int
+                
+                enum CodingKeys: String, CodingKey {
+                    case name = "user_name"
+                    case age
+                }
+            }
+            """,
+            expandedSource: """
+            @AutoCodingKeys
+            struct User: Codable {
+                @jsonKey("user_name") let name: String
+                let age: Int
+                
+                enum CodingKeys: String, CodingKey {
+                    case name = "user_name"
+                    case age
+                }
+            }
+            """,
+            diagnostics: [
+                DiagnosticSpec(message: "`CodingKeys` enum already exists. Remove `@AutoCodingKeys` or remove the existing `CodingKeys` declaration.", line: 1, column: 1)
+            ],
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+
+    func test_autoCodingKeys_withExistingCodingKeysTypealias_shouldFail() {
+        #if canImport(DoraKitMacros)
+        assertMacroExpansion(
+            """
+            @AutoCodingKeys
+            struct User: Codable {
+                @jsonKey("user_name") let name: String
+                let age: Int
+                
+                typealias CodingKeys = String
+            }
+            """,
+            expandedSource: """
+            @AutoCodingKeys
+            struct User: Codable {
+                @jsonKey("user_name") let name: String
+                let age: Int
+                
+                typealias CodingKeys = String
+            }
+            """,
+            diagnostics: [
+                DiagnosticSpec(message: "`CodingKeys` enum already exists. Remove `@AutoCodingKeys` or remove the existing `CodingKeys` declaration.", line: 1, column: 1)
+            ],
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
 }
 
 
