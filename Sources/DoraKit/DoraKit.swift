@@ -35,31 +35,52 @@ public macro jsonKey(_ key: String) = #externalMacro(
 
 
 // MARK: - Auto generate CodingKeys
-/// A macro that automatically generates a `CodingKeys` enum for Codable types.
+/// A macro that automatically generates a `CodingKeys` enum for Codable types and ensures proper protocol conformance.
 ///
-/// Apply this macro to a struct or class that conforms to `Codable`. The macro
-/// will scan all stored properties and generate an appropriate `CodingKeys` enum:
+/// Apply this macro to a struct or class to automatically:
+/// 1. Generate an appropriate `CodingKeys` enum based on stored properties
+/// 2. Add missing Codable protocol conformance if needed
+///
+/// **CodingKeys Generation:**
 /// - Properties marked with `@jsonKey` will use the specified custom key
 /// - Properties without `@jsonKey` will use their property name as the key
+/// - Only stored properties (let/var) are included; computed properties are ignored
 ///
-/// For example:
+/// **Protocol Conformance:**
+/// - If no Codable-related protocols are adopted: adds `Codable`
+/// - If only `Encodable` is adopted: adds `Decodable`
+/// - If only `Decodable` is adopted: adds `Encodable`
+/// - If `Codable` or both `Encodable & Decodable` are already adopted: no changes
+///
+/// **Example:**
 /// ```swift
 /// @AutoCodingKeys
-/// struct User: Codable {
+/// struct User {  // No Codable needed - macro adds it automatically
 ///     @jsonKey("user_name") let name: String
 ///     @jsonKey("user_age") let age: Int
 ///     let email: String        // uses "email" as key
 ///     let isActive: Bool       // uses "isActive" as key
+///
+///     var fullName: String {   // ignored (computed property)
+///         "\(name) (\(age))"
+///     }
 /// }
 /// ```
 ///
-/// This generates:
+/// **Generated code:**
 /// ```swift
-/// enum CodingKeys: String, CodingKey {
-///     case name = "user_name"
-///     case age = "user_age"
-///     case email
-///     case isActive
+/// struct User {
+///     // ... properties remain the same
+///
+///     enum CodingKeys: String, CodingKey {
+///         case name = "user_name"
+///         case age = "user_age"
+///         case email
+///         case isActive
+///     }
+/// }
+///
+/// extension User: Codable {
 /// }
 /// ```
 ///
@@ -67,9 +88,11 @@ public macro jsonKey(_ key: String) = #externalMacro(
 /// - Note: Computed properties are automatically ignored
 /// - Warning: All JSON keys must be unique within the same type
 /// - Warning: Can only be applied to struct or class declarations
+/// - Warning: If `CodingKeys` already exists, no extension will be added either
 
 @attached(member, names: named(CodingKeys))
+@attached(extension, conformances: Codable, Decodable, Encodable)
 public macro AutoCodingKeys() = #externalMacro(
-    module: "DoraKitMacros",
-    type: "AutoCodingKeysMacro"
+   module: "DoraKitMacros",
+   type: "AutoCodingKeysMacro"
 )

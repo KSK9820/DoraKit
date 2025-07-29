@@ -82,6 +82,66 @@ extension JsonKeyMacro: PeerMacro {
 }
 
 
+/// Implementation of the `@AutoCodingKeys` macro, which automatically generates
+/// a `CodingKeys` enum for structs that need custom JSON key mapping and ensures
+/// proper Codable protocol conformance.
+///
+/// This macro combines **member generation** and **extension generation** functionality:
+/// 1. Scans all stored properties in the struct to create appropriate `CodingKeys` enum cases
+/// 2. Automatically adds missing Codable protocol conformance via extensions
+///
+/// The macro works by:
+/// - Finding properties with `@jsonKey` attributes and using their custom key names
+/// - Including properties without `@jsonKey` using their original property names
+/// - Excluding computed properties and static properties from encoding/decoding
+/// - Adding `Codable`, `Encodable`, or `Decodable` conformance as needed
+///
+/// Usage:
+/// ```swift
+/// @AutoCodingKeys
+/// struct User {  // No need to manually add Codable - macro handles it
+///     @jsonKey("user_name") let name: String
+///     @jsonKey("user_age") let age: Int
+///     let email: String        // uses "email" as key
+///     let isActive: Bool       // uses "isActive" as key
+///
+///     var fullName: String {   // ignored (computed property)
+///         "\(name) (\(age))"
+///     }
+/// }
+/// ```
+///
+/// This will generate:
+/// ```swift
+/// struct User {
+///     // ... original properties remain unchanged
+///
+///     enum CodingKeys: String, CodingKey {
+///         case name = "user_name"
+///         case age = "user_age"
+///         case email
+///         case isActive
+///     }
+/// }
+///
+/// extension User: Codable {
+/// }
+/// ```
+///
+/// Protocol Conformance Logic:
+/// - If no Codable protocols exist: adds `Codable`
+/// - If only `Encodable` exists: adds `Decodable`
+/// - If only `Decodable` exists: adds `Encodable`
+/// - If `Codable` or both `Encodable & Decodable` exist: no extension added
+///
+/// Constraints:
+/// - Must be applied only to `struct` declarations
+/// - Cannot be used if `CodingKeys` (enum or typealias) already exists in the struct
+/// - All JSON key names (from `@jsonKey` or property names) must be unique
+/// - Only processes stored properties (`let`/`var` without accessors)
+/// - Ignores computed properties and static properties
+/// - Requires at least one stored property to generate meaningful `CodingKeys`
+
 public struct AutoCodingKeysMacro {}
 
 extension AutoCodingKeysMacro: MemberMacro {
@@ -228,6 +288,59 @@ extension AutoCodingKeysMacro: MemberMacro {
         }
         
         return enumDecl
+    }
+}
+
+extension AutoCodingKeysMacro: ExtensionMacro {
+    /// Generates extensions to add missing Codable protocol conformance automatically
+    /// 누락된 Codable 프로토콜 준수를 자동으로 추가하는 extension을 생성합니다
+    public static func expansion(
+        of node: AttributeSyntax,
+        attachedTo declaration: some DeclGroupSyntax,
+        providingExtensionsOf type: some TypeSyntaxProtocol,
+        conformingTo protocols: [TypeSyntax],
+        in context: some MacroExpansionContext
+    ) throws -> [ExtensionDeclSyntax] {
+        
+        // 1. Ensure it's applied to a struct declaration
+        // 1. 구조체인지 확인
+        guard let structDecl = declaration.as(StructDeclSyntax.self) else {
+            throw MacroExpansionError.notStruct
+        }
+        
+        // 2. Analyze current protocol conformances to determine what's missing
+        // 2. 현재 프로토콜 준수 상황을 분석하여 누락된 부분 파악
+        let inheritedTypes = structDecl.inheritanceClause?.inheritedTypes ?? []
+        let adoptedProtocols = Set(inheritedTypes.compactMap { $0.type.trimmedDescription })
+        
+        // Check which Codable-related protocols are already adopted
+        // 이미 채택된 Codable 관련 프로토콜 확인
+        let hasEncodable = adoptedProtocols.contains("Encodable")
+        let hasDecodable = adoptedProtocols.contains("Decodable")
+        let hasCodable = adoptedProtocols.contains("Codable")
+        
+        // 3. If already has complete Codable conformance, no extension needed
+        // 3. 이미 완전한 Codable 준수가 있다면 extension 불필요
+        if hasCodable || (hasEncodable && hasDecodable) {
+            return []
+        }
+        
+        // 4. Generate appropriate extensions based on what protocols are missing
+        // 4. 누락된 프로토콜에 따라 적절한 extension 생성
+        var extensionsToAdd: [ExtensionDeclSyntax] = []
+        
+        if !hasEncodable && !hasDecodable {
+            let extensionDecl = try ExtensionDeclSyntax("extension \(type.trimmed): Codable {}")
+            extensionsToAdd.append(extensionDecl)
+        } else if hasEncodable && !hasDecodable {
+            let extensionDecl = try ExtensionDeclSyntax("extension \(type.trimmed): Decodable {}")
+            extensionsToAdd.append(extensionDecl)
+        } else if !hasEncodable && hasDecodable {
+            let extensionDecl = try ExtensionDeclSyntax("extension \(type.trimmed): Encodable {}")
+            extensionsToAdd.append(extensionDecl)
+        }
+        
+        return extensionsToAdd
     }
 }
 
