@@ -35,6 +35,10 @@ enum MacroExpansionError: Error, CustomStringConvertible {
     /// 서로 다른 프로퍼티에서 중복된 JSON 키 값이 발견된 경우
     case duplicateJsonKeyValue(String)
     
+    /// No stored properties found to generate CodingKeys from.
+    /// CodingKeys를 생성할 저장 프로퍼티가 없는 경우
+    case noStoredProperties
+    
     /// CodingKeys enum already exists in the target type.
     /// 대상 타입에 CodingKeys enum이 이미 존재하는 경우
     case codingKeysAlreadyExists
@@ -59,6 +63,8 @@ enum MacroExpansionError: Error, CustomStringConvertible {
             return "A variable can have only one `@jsonKey` attribute."
         case .duplicateJsonKeyValue(let key):
             return "Duplicate JSON key '\(key)' found. Each property must have a unique JSON key."
+        case .noStoredProperties:
+            return "No stored properties found to generate `CodingKeys`."
         case .codingKeysAlreadyExists:
             return "`CodingKeys` enum already exists. Remove `@AutoCodingKeys` or remove the existing `CodingKeys` declaration."
         case .unknown(let reason):

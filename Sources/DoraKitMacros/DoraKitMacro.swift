@@ -163,9 +163,12 @@ extension AutoCodingKeysMacro: MemberMacro {
             throw MacroExpansionError.codingKeysAlreadyExists
         }
         
-        // 3. Extract all stored properties from the struct
-        // 3. 구조체에서 모든 저장 프로퍼티 추출
+        // 3. Extract all stored properties from the struct and validate whether it has stored properties
+        // 3. 구조체에서 모든 저장 프로퍼티 추출 및 저장 프로퍼티가 없을 경우 생성 방지
         let properties = try extractStoredProperties(from: structDecl)
+        guard !properties.isEmpty else {
+            throw MacroExpansionError.noStoredProperties
+        }
         
         // 4. Generate the CodingKeys enum based on collected properties
         // 4. 수집된 프로퍼티를 기반으로 CodingKeys enum 생성

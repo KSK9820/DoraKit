@@ -16,3 +16,4 @@ struct A: Codable {
 struct B: Encodable {
     @jsonKey("bb") let b: String
 }
+
