@@ -22,7 +22,7 @@ Install using Swift Package Manager:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-username/DoraKit.git", from: "1.0.0")
+    .package(url: "https://github.com/KSK9820/DoraKit.git", from: "1.0.0")
 ]
 ```
 

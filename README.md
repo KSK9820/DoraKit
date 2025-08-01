@@ -22,7 +22,7 @@ Swift Package Manager를 사용하여 설치하세요:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-username/DoraKit.git", from: "1.0.0")
+    .package(url: "https://github.com/KSK9820/DoraKit.git", from: "1.0.0")
 ]
 ```
 
@@ -252,11 +252,41 @@ swift test
 
 ## 🤝 기여하기
 
-1. 이 저장소를 포크하세요
+기여에 관심을 가져주셔서 감사합니다! 자세한 기여 가이드는 [CONTRIBUTING.md](CONTRIBUTING.md)를 참조하세요.
+
+### 개발 환경 설정
+
+**요구사항:**
+- Swift 6.0+
+- Xcode 15.0+ (개발용)
+- macOS 10.15+
+
+**빌드 및 테스트:**
+```bash
+# 저장소 클론
+git clone https://github.com/KSK9820/DoraKit.git
+cd DoraKit
+
+# 프로젝트 빌드
+swift build
+
+# 테스트 실행
+swift test
+```
+
+### 간단한 기여 과정
+
+1. 저장소를 포크하세요
 2. 기능 브랜치를 생성하세요 (`git checkout -b feature/amazing-feature`)
 3. 변경사항을 커밋하세요 (`git commit -m 'Add some amazing feature'`)
 4. 브랜치에 푸시하세요 (`git push origin feature/amazing-feature`)
 5. Pull Request를 생성하세요
+
+## 📋 변경 이력
+
+자세한 변경 이력은 [CHANGELOG.md](CHANGELOG.md)를 참조하세요.
+
+---
 
 ## 📄 라이선스
 
