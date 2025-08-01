@@ -22,14 +22,14 @@ let testMacros: [String: Macro.Type] = [
 final class DoraKitTests: XCTestCase {
     // MARK: - JsonKey Macro Tests / JsonKey 매크로 테스트
     
-    // Test: @jsonKey on property should succeed
-    // 테스트: 프로퍼티에 @jsonKey 사용 시 성공
+    // Test: @JsonKey on property should succeed
+    // 테스트: 프로퍼티에 @JsonKey 사용 시 성공
     func test_jsonKey_onProperty_shouldSucceed() {
         #if canImport(DoraKitMacros)
         assertMacroExpansion(
             """
             struct User: Codable {
-                @jsonKey("user_name") let name: String
+                @JsonKey("user_name") let name: String
             }
             """,
             expandedSource: """
@@ -51,13 +51,13 @@ final class DoraKitTests: XCTestCase {
         assertMacroExpansion(
             """
             func foo() {
-                @jsonKey("invalid") print("Hello")
+                @JsonKey("invalid") print("Hello")
             }
             """,
             expandedSource: "",
             diagnostics: [
                 DiagnosticSpec(
-                    message: "`@jsonKey` can only be attached to a variable declared with `let` or `var`.",
+                    message: "`@JsonKey` can only be attached to a variable declared with `let` or `var`.",
                     line: 2,
                     column: 5
                 )
@@ -76,13 +76,13 @@ final class DoraKitTests: XCTestCase {
         assertMacroExpansion(
             """
             struct User {
-                @jsonKey(123) let name: String
+                @JsonKey(123) let name: String
             }
             """,
             expandedSource: "",
             diagnostics: [
                 DiagnosticSpec(
-                    message: "`@jsonKey` requires a string literal as its argument. For example: `@jsonKey(\"custom_key\")`.",
+                    message: "`@JsonKey` requires a string literal as its argument. For example: `@JsonKey(\"custom_key\")`.",
                     line: 2,
                     column: 5
                 )
@@ -101,13 +101,13 @@ final class DoraKitTests: XCTestCase {
         assertMacroExpansion(
             """
             struct User {
-                @jsonKey("") let name: String
+                @JsonKey("") let name: String
             }
             """,
             expandedSource: "",
             diagnostics: [
                 DiagnosticSpec(
-                    message: "`@jsonKey` argument string cannot be empty.",
+                    message: "`@JsonKey` argument string cannot be empty.",
                     line: 2,
                     column: 5
                 )
@@ -119,20 +119,20 @@ final class DoraKitTests: XCTestCase {
         #endif
     }
 
-    // Test 4: Duplicate @jsonKey on same variable
-    // 테스트 4: 같은 변수에 중복된 @jsonKey 사용
+    // Test 4: Duplicate @JsonKey on same variable
+    // 테스트 4: 같은 변수에 중복된 @JsonKey 사용
     func test_jsonKey_duplicateOnSameVariable_shouldFail() {
         #if canImport(DoraKitMacros)
         assertMacroExpansion(
             """
             struct User {
-                @jsonKey("name_1") @jsonKey("name_2") let name: String
+                @JsonKey("name_1") @JsonKey("name_2") let name: String
             }
             """,
             expandedSource: "",
             diagnostics: [
                 DiagnosticSpec(
-                    message: "A variable can have only one `@jsonKey` attribute.",
+                    message: "A variable can have only one `@JsonKey` attribute.",
                     line: 2,
                     column: 19
                 )
@@ -154,8 +154,8 @@ final class DoraKitTests: XCTestCase {
             """
             @AutoCodingKeys
             struct User: Codable {
-                @jsonKey("user_name") let name: String
-                @jsonKey("user_age") let age: Int
+                @JsonKey("user_name") let name: String
+                @JsonKey("user_age") let age: Int
                 let email: String
                 let isActive: Bool
             }
@@ -182,16 +182,16 @@ final class DoraKitTests: XCTestCase {
         #endif
     }
     
-    // Test: All properties have @jsonKey
-    // 테스트: 모든 프로퍼티가 @jsonKey를 가진 경우
+    // Test: All properties have @JsonKey
+    // 테스트: 모든 프로퍼티가 @JsonKey를 가진 경우
     func test_autoCodingKeys_withOnlyJsonKeyProperties() {
         #if canImport(DoraKitMacros)
         assertMacroExpansion(
             """
             @AutoCodingKeys
             struct Product: Codable {
-                @jsonKey("product_id") let id: String
-                @jsonKey("product_name") let name: String
+                @JsonKey("product_id") let id: String
+                @JsonKey("product_name") let name: String
             }
             """,
             expandedSource: """
@@ -212,8 +212,8 @@ final class DoraKitTests: XCTestCase {
         #endif
     }
 
-    // Test: No properties have @jsonKey
-    // 테스트: @jsonKey가 없는 프로퍼티만 있는 경우
+    // Test: No properties have @JsonKey
+    // 테스트: @JsonKey가 없는 프로퍼티만 있는 경우
     func test_autoCodingKeys_withNoJsonKeyProperties() {
         #if canImport(DoraKitMacros)
         assertMacroExpansion(
@@ -250,7 +250,7 @@ final class DoraKitTests: XCTestCase {
             """
             @AutoCodingKeys
             struct User: Codable {
-                @jsonKey("user_name") let name: String
+                @JsonKey("user_name") let name: String
                 let age: Int
                 
                 enum CodingKeys: String, CodingKey {
@@ -262,7 +262,7 @@ final class DoraKitTests: XCTestCase {
             expandedSource: """
             @AutoCodingKeys
             struct User: Codable {
-                @jsonKey("user_name") let name: String
+                @JsonKey("user_name") let name: String
                 let age: Int
                 
                 enum CodingKeys: String, CodingKey {
@@ -293,7 +293,7 @@ final class DoraKitTests: XCTestCase {
             """
             @AutoCodingKeys
             struct User: Codable {
-                @jsonKey("user_name") let name: String
+                @JsonKey("user_name") let name: String
                 let age: Int
                 
                 typealias CodingKeys = String
@@ -302,7 +302,7 @@ final class DoraKitTests: XCTestCase {
             expandedSource: """
             @AutoCodingKeys
             struct User: Codable {
-                @jsonKey("user_name") let name: String
+                @JsonKey("user_name") let name: String
                 let age: Int
                 
                 typealias CodingKeys = String

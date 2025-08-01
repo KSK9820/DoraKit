@@ -27,8 +27,8 @@ enum MacroExpansionError: Error, CustomStringConvertible {
     /// 매크로 인자가 ""와 같은 빈 값을 가지는 경우
     case emptyString
     
-    /// The variable has multiple @jsonKey attributes attached.
-    /// 변수에 여러 개의 @jsonKey 어트리뷰트가 부착된 경우
+    /// The variable has multiple @JsonKey attributes attached.
+    /// 변수에 여러 개의 @JsonKey 어트리뷰트가 부착된 경우
     case duplicateJsonKeyAttribute
     
     /// Duplicate JSON key values found across different properties.
@@ -52,15 +52,15 @@ enum MacroExpansionError: Error, CustomStringConvertible {
     var description: String {
         switch self {
         case .notVariable:
-            return "`@jsonKey` can only be attached to a variable declared with `let` or `var`."
+            return "`@JsonKey` can only be attached to a variable declared with `let` or `var`."
         case .notStruct:
             return "`@AutoCodingKeys` can only be applied to struct declarations."
         case .notStringLiteral:
-            return "`@jsonKey` requires a string literal as its argument. For example: `@jsonKey(\"custom_key\")`."
+            return "`@JsonKey` requires a string literal as its argument. For example: `@JsonKey(\"custom_key\")`."
         case .emptyString:
-            return "`@jsonKey` argument string cannot be empty."
+            return "`@JsonKey` argument string cannot be empty."
         case .duplicateJsonKeyAttribute:
-            return "A variable can have only one `@jsonKey` attribute."
+            return "A variable can have only one `@JsonKey` attribute."
         case .duplicateJsonKeyValue(let key):
             return "Duplicate JSON key '\(key)' found. Each property must have a unique JSON key."
         case .noStoredProperties:

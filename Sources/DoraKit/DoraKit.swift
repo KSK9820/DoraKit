@@ -14,8 +14,8 @@
 /// For example:
 /// ```swift
 /// struct User: Codable {
-///     @jsonKey("user_name") var name: String
-///     @jsonKey("user_age") var age: Int
+///     @JsonKey("user_name") var name: String
+///     @JsonKey("user_age") var age: Int
 /// }
 /// ```
 ///
@@ -28,7 +28,7 @@
 /// - Warning: Cannot be applied to the same property multiple times
 
 @attached(peer)
-public macro jsonKey(_ key: String) = #externalMacro(
+public macro JsonKey(_ key: String) = #externalMacro(
     module: "DoraKitMacros",
     type: "JsonKeyMacro"
 )
@@ -42,8 +42,8 @@ public macro jsonKey(_ key: String) = #externalMacro(
 /// 2. Add missing Codable protocol conformance if needed
 ///
 /// **CodingKeys Generation:**
-/// - Properties marked with `@jsonKey` will use the specified custom key
-/// - Properties without `@jsonKey` will use their property name as the key
+/// - Properties marked with `@JsonKey` will use the specified custom key
+/// - Properties without `@JsonKey` will use their property name as the key
 /// - Only stored properties (let/var) are included; computed properties are ignored
 ///
 /// **Protocol Conformance:**
@@ -56,8 +56,8 @@ public macro jsonKey(_ key: String) = #externalMacro(
 /// ```swift
 /// @AutoCodingKeys
 /// struct User {  // No Codable needed - macro adds it automatically
-///     @jsonKey("user_name") let name: String
-///     @jsonKey("user_age") let age: Int
+///     @JsonKey("user_name") let name: String
+///     @JsonKey("user_age") let age: Int
 ///     let email: String        // uses "email" as key
 ///     let isActive: Bool       // uses "isActive" as key
 ///
