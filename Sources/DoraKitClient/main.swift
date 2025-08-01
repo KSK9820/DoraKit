@@ -9,11 +9,12 @@ struct User {
 
 @AutoCodingKeys
 struct A: Codable {
-    @jsonKey("aa") let a: String
+    @jsonKey("Making") let making: String
+    @jsonKey("CODINGKEY") let codingkey: String
 }
 
 @AutoCodingKeys
-struct B: Encodable {
-    @jsonKey("bb") let b: String
+struct B: Encodable, Hashable {
+    @jsonKey("is") let IS: String
+    @jsonKey("Finish") let finish: String
 }
-
