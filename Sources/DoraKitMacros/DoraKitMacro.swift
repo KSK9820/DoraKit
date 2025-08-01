@@ -198,11 +198,19 @@ extension AutoCodingKeysMacro: MemberMacro {
         return false
     }
     
-    // PropertyInfo 구조체 정의
+    /// Represents information about a stored property for CodingKeys generation
+    /// CodingKeys 생성을 위한 저장 프로퍼티 정보를 나타냄
     struct PropertyInfo {
+        /// The original property name in Swift
+        /// Swift에서의 원본 프로퍼티 이름
         let name: String
+        
+        /// The custom JSON key name (if specified via @jsonKey)
+        /// 커스텀 JSON 키 이름 (@jsonKey로 지정된 경우)
         let jsonKey: String?
         
+        /// The final key name to be used in CodingKeys enum
+        /// CodingKeys enum에서 사용될 최종 키 이름
         var codingKeyName: String {
             return jsonKey ?? name
         }
