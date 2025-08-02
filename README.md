@@ -33,8 +33,8 @@ import DoraKit
 
 @AutoCodingKeys
 struct User {
-    @jsonKey("user_name") let name: String
-    @jsonKey("user_age") let age: Int
+    @JsonKey("user_name") let name: String
+    @JsonKey("user_age") let age: Int
     let email: String        // "email"로 매핑
     let isActive: Bool       // "isActive"로 매핑
     
